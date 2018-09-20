@@ -1,0 +1,3 @@
+BEGIN WHEN
+	m=n : m:=2*n; END;
+END.

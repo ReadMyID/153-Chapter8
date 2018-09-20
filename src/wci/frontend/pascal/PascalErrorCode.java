@@ -44,6 +44,7 @@ public enum PascalErrorCode
     MISSING_FOR_CONTROL("Invalid FOR control variable"),
     MISSING_IDENTIFIER("Missing identifier"),
     MISSING_LEFT_BRACKET("Missing ["),
+    MISSING_NEXT("Missing =>"),
     MISSING_OF("Missing OF"),
     MISSING_PERIOD("Missing ."),
     MISSING_PROGRAM("Missing PROGRAM"),

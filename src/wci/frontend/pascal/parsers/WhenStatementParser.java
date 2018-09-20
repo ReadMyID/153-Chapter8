@@ -32,15 +32,15 @@ public class WhenStatementParser extends StatementParser
     }
 
     // Synchronization set for DO.
-    private static final EnumSet<PascalTokenType> DO_SET =
+    private static final EnumSet<PascalTokenType> NEXT_SET =
         StatementParser.STMT_START_SET.clone();
     static {
-        DO_SET.add(DO);
-        DO_SET.addAll(StatementParser.STMT_FOLLOW_SET);
+        NEXT_SET.add(NEXT);
+        NEXT_SET.addAll(StatementParser.STMT_FOLLOW_SET);
     }
 
     /**
-     * Parse a WHILE statement.
+     * Parse an IF statement.
      * @param token the initial token.
      * @return the root node of the generated parse tree.
      * @throws Exception if an error occurred.
@@ -48,37 +48,40 @@ public class WhenStatementParser extends StatementParser
     public ICodeNode parse(Token token)
         throws Exception
     {
-        token = nextToken();  // consume the WHILE
+        token = nextToken();  // consume the IF
 
-        // Create LOOP, TEST, and NOT nodes.
-        ICodeNode loopNode = ICodeFactory.createICodeNode(LOOP);
-        ICodeNode breakNode = ICodeFactory.createICodeNode(TEST);
-        ICodeNode notNode = ICodeFactory.createICodeNode(ICodeNodeTypeImpl.NOT);
-
-        // The LOOP node adopts the TEST node as its first child.
-        // The TEST node adopts the NOT node as its only child.
-        loopNode.addChild(breakNode);
-        breakNode.addChild(notNode);
+        // Create an IF node.
+        ICodeNode ifNode = ICodeFactory.createICodeNode(ICodeNodeTypeImpl.IF);
 
         // Parse the expression.
-        // The NOT node adopts the expression subtree as its only child.
+        // The IF node adopts the expression subtree as its first child.
         ExpressionParser expressionParser = new ExpressionParser(this);
-        notNode.addChild(expressionParser.parse(token));
+        ifNode.addChild(expressionParser.parse(token));
 
-        // Synchronize at the DO.
-        token = synchronize(DO_SET);
-        if (token.getType() == DO) {
-            token = nextToken();  // consume the DO
+        // Synchronize at the THEN.
+        token = synchronize(NEXT_SET);
+        if (token.getType() == NEXT) {
+            token = nextToken();  // consume the =>
         }
         else {
-            errorHandler.flag(token, MISSING_DO, this);
+            errorHandler.flag(token, MISSING_NEXT, this);
         }
 
-        // Parse the statement.
-        // The LOOP node adopts the statement subtree as its second child.
+        // Parse the THEN statement.
+        // The IF node adopts the statement subtree as its second child.
         StatementParser statementParser = new StatementParser(this);
-        loopNode.addChild(statementParser.parse(token));
+        ifNode.addChild(statementParser.parse(token));
+        token = currentToken();
 
-        return loopNode;
+        // Look for an ELSE.
+        if (token.getType() == OTHERWISE) {
+            token = nextToken();  // consume the THEN
+
+            // Parse the ELSE statement.
+            // The IF node adopts the statement subtree as its third child.
+            ifNode.addChild(statementParser.parse(token));
+        }
+
+        return ifNode;
     }
 }
