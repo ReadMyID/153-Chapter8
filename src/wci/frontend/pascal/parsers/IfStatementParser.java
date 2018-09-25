@@ -64,7 +64,7 @@ public class IfStatementParser extends StatementParser
             token = nextToken();  // consume the THEN
         }
         else {
-            errorHandler.flag(token, MISSING_NEXT, this);
+            errorHandler.flag(token, MISSING_THEN, this);
         }
 
         // Parse the THEN statement.
