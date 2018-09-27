@@ -69,6 +69,7 @@ public class WhenStatementParser extends StatementParser {
 
 			token = currentToken();
 			// consume the =>
+			token = synchronize(NEXT_SET);
 			if (token.getType() == NEXT) {
 				token = nextToken();
 			} else {
@@ -111,6 +112,10 @@ public class WhenStatementParser extends StatementParser {
 				}
 				break;
 				// 'OTHERWISE' not found
+			} else if (token.getType() == END) {
+				errorHandler.flag(token, MISSING_OTHERWISE, this);
+				token = nextToken();
+				break;
 			} else {
 				// Create an new IF node to be adopted as the third child of parent IF node
 
